@@ -32,11 +32,19 @@ def paginate(obj_list, request, per_page):
     except ValueError:
         page_num = 1
     page_obj = paginator.get_page(page_num)
+    num = int(page_num)
+    if page_obj.has_next() and num + 3 <= paginator.num_pages:
+        a = range(int(page_num)+1, int(page_num)+4)
+    elif not(page_obj.has_next()):
+        a = range(1, 2)
+    else:
+        a = range(int(page_num)+1, paginator.num_pages+1)
+    page_obj.page_range = a
     return page_obj
 
 def index(request):
     page_obj = paginate(QUESTIONS, request, 5)
-    return render(request, 'index.html', {"questions": page_obj, "url":"index"})
+    return render(request, 'index.html', {"questions": page_obj})
 
 
 def hot(request):
