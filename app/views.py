@@ -2,6 +2,7 @@ from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.shortcuts import render
 
+from app import models
 QUESTIONS = [
     {
         "id": i,
@@ -15,7 +16,6 @@ QUESTIONS = [
         ],
         "tags": [
             {
-                "id": k,
                 "title":f'Tag{k}'
             } for k in range(3)
         ],
@@ -43,16 +43,21 @@ def paginate(obj_list, request, per_page):
     return page_obj
 
 def index(request):
-    page_obj = paginate(QUESTIONS, request, 5)
+    questions = models.Question.objects.get_new_question()
+    # questions = models.Question.objects.add_tag(questions)
+    tags = models.Tag.objects.all()
+    tags[0].question_set(questions[0])
+    print(questions[0].tags.all())
+    page_obj = paginate(questions, request, 5)
     return render(request, 'index.html', {"questions": page_obj})
 
 
 def hot(request):
-    questions = QUESTIONS[len(QUESTIONS)-5:]
+    questions = models.Question.objects.get_popular()
     return render(request, 'hot.html', {"questions": questions})
 
 def question(request, question_id):
-    item = QUESTIONS[question_id]
+    item = models.Question.objects.get(pk=question_id)
     return render(request, 'question.html', {"item": item})
 
 
@@ -60,9 +65,10 @@ def new_question(request):
     return render(request, 'ask.html')
 
 
-def tags(request, tag_id):
-    page_obj = paginate(QUESTIONS, request, 3)
-    return render(request, 'tags.html', {"questions": page_obj, "tag":tag_id})
+def tags(request, tag_title):
+    questions = models.Question.objects.get_by_tag(tag_title)
+    page_obj = paginate(questions, request, 3)
+    return render(request, 'tags.html', {"questions": page_obj, "tag":tag_title})
 
 
 def settings(request):
