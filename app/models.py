@@ -33,17 +33,23 @@ class Tag(models.Model):
 
 class QuestionManager(models.Manager):
     def get_new_question(self):
-        return self.order_by('created_at')
+        return self.order_by('created_at')[:100]
     def get_popular(self):
-        return self.order_by('rating')
+        return self.order_by('rating')[:5]
     def get_by_tag(self, tag_title):
         return self.filter(tags__title=tag_title)
-    def add_tag(self, questions):
-        question_list = questions.values()
-        for i in range(0, len(question_list)):
-            tags = Tag.objects.filter(question=question_list[i]['id'])
-            question_list[i]["tags"] = tags
-        return questions
+    def get_tag(self, questions):
+        dict = questions.values()
+        for question in dict:
+            tags = Question.objects.get(pk=question['id']).tags.all()
+            question['tags'] = tags
+        return dict
+    def get_one(self, id):
+        question = Question.objects.filter(pk=id).values()[0]
+        tags = Question.objects.get(pk=id).tags.all()
+        question['tags'] = tags
+        return question
+
 
 class Question(models.Model):
     title = models.TextField(max_length=40)
@@ -57,6 +63,15 @@ class Question(models.Model):
     def __str__(self):
         return self.title
 
+class AnswerManager(models.Manager):
+    def get_answers(self, question):
+        return self.filter(question=question)
+    def get_all_answers(self, questions):
+        for question in questions:
+            answers = Answer.objects.filter(question=question['id'])
+            question['answers'] = answers
+        return questions
+
 class Answer(models.Model):
     text = models.TextField()
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
@@ -64,6 +79,7 @@ class Answer(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     rating = models.IntegerField(default=0)
+    objects = AnswerManager()
     def __str__(self):
         return self.text
 

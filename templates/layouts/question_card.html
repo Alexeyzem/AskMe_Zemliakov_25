@@ -19,7 +19,7 @@
 	                  {{item.text}}
                   </p>
                   <div class="row">
-                    <a class="col-4" href='{% url "question" item.id %}'>answers (3)</a>
+                    <a class="col-4" href='{% url "question" item.id %}'>answers: {{ item.answers.count }}</a>
                     <div class="col-8">
                       <span>Tags</span>
 	                    {% for tag in item.tags %}

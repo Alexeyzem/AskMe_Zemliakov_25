@@ -44,20 +44,22 @@ def paginate(obj_list, request, per_page):
 
 def index(request):
     questions = models.Question.objects.get_new_question()
-    # questions = models.Question.objects.add_tag(questions)
-    tags = models.Tag.objects.all()
-    tags[0].question_set(questions[0])
-    print(questions[0].tags.all())
-    page_obj = paginate(questions, request, 5)
+    obj = models.Question.objects.get_tag(questions)
+    obj = models.Answer.objects.get_all_answers(obj)
+    page_obj = paginate(obj, request, 5)
     return render(request, 'index.html', {"questions": page_obj})
 
 
 def hot(request):
     questions = models.Question.objects.get_popular()
-    return render(request, 'hot.html', {"questions": questions})
+    obj = models.Question.objects.get_tag(questions)
+    obj = models.Answer.objects.get_all_answers(obj)
+    return render(request, 'hot.html', {"questions": obj})
 
 def question(request, question_id):
-    item = models.Question.objects.get(pk=question_id)
+    item = models.Question.objects.get_one(question_id)
+    answers = models.Answer.objects.get_answers(item['id'])
+    item['answers'] = answers
     return render(request, 'question.html', {"item": item})
 
 
@@ -67,7 +69,8 @@ def new_question(request):
 
 def tags(request, tag_title):
     questions = models.Question.objects.get_by_tag(tag_title)
-    page_obj = paginate(questions, request, 3)
+    obj = models.Question.objects.get_tag(questions)
+    page_obj = paginate(obj, request, 3)
     return render(request, 'tags.html', {"questions": page_obj, "tag":tag_title})
 
 
