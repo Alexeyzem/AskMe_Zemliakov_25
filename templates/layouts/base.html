@@ -65,11 +65,9 @@
             </div>
           <h3 class="mt-5">Best Members</h3>
           <div>
-            <a href='{% url "members" %}' class="d-block">Mr. Freeman</a
-            ><a href='{% url "members" %}' class="d-block">Mr. Freeman</a
-            ><a href='{% url "members" %}'  class="d-block">Mr. Freeman</a
-            ><a href='{% url "members" %}'  class="d-block">Mr. Freeman</a
-            ><a href='{% url "members" %}' class="d-block">Mr. Freeman</a>
+	          {% for member in best_members %}
+            <a href='{% url "members" %}' class="d-block">{{ member.user.username}}</a>
+	          {% endfor %}
           </div>
         </div>
       </div>

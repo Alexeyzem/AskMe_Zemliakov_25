@@ -17,10 +17,15 @@ from django.db import models
 # is_superuser  считает пользователя имеющим все разрешения
 # last_login - date when user last login
 # date_joined - date when the acc created
+
+class ProfileManager(models.Manager):
+    def get_top(self):
+        return self.order_by('rating')[:5]
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.PROTECT)
     rating = models.IntegerField(default=0)
     avatar = models.ImageField(null=True, blank=True)
+    objects = ProfileManager()
     def __str__(self):
         return str(self.user.username)
 
@@ -35,7 +40,7 @@ class QuestionManager(models.Manager):
     def get_new_question(self):
         return self.order_by('created_at')[:100]
     def get_popular(self):
-        return self.order_by('rating')[:5]
+        return self.order_by('rating').reverse()[:5]
     def get_by_tag(self, tag_title):
         return self.filter(tags__title=tag_title)
     def get_tag(self, questions):
