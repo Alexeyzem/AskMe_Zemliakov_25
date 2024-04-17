@@ -10,9 +10,10 @@
           {% include "layouts/question_card.html" %}
 	<hr>
 	        <h5>Answers:</h5>
-	        {% for answer in item.answers %}
-         {% include "layouts/answer_card.html" with item=answer %}
+	        {% for answer in answers %}
+         {% include "layouts/answer_card.html" with item=answer%}
 		{% endfor %}
+        {% include "layouts/pagination.html" with page_obj=answers%}
 
 	        <hr>
 	        <textarea style="height: 100px; width: 100%" placeholder="Input your answer here"></textarea>

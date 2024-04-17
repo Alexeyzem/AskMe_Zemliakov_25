@@ -74,36 +74,54 @@ class Command(BaseCommand):
         models.Profile.objects.bulk_create(profiles)
         print("Profile created successfully")
 
-        questions =[models.Question(title=fake.word()+f'{i}',
+        questions =[models.Question(title=fake.word()+f'{i%10}',
                                                 text=fake.text(),
                                                 author=profiles[random.randint(0,count.USER-1)],
-                                                rating=random.randint(0,100),
+                                                rating=0,
+                                                answers_count=0,
                                                 created_at=fake.date(),
                                                 updated_at=fake.date()) for i in range(count.QUESTION)]
-        models.Question.objects.bulk_create(questions)
+
         print("Questions created successfully")
 
-        for i in range(count.TAG):
-            tags[i].question_set.set(questions[random.randint(0,count.QUESTION-1)] for _ in range(random.randint(1,10)))
-        print("Questions with tag created successfully")
+        answers = []
+        for _ in range(count.ANSWER):
+            question = questions[random.randint(0, count.QUESTION - 1)]
+            question.answers_count += 1
+            answers.append(models.Answer(text=fake.text(),
+                                         author=profiles[random.randint(0, count.USER - 1)],
+                                         rating=0,
+                                         question=question,
+                                         created_at=fake.date(),
+                                         updated_at=fake.date()))
 
-        answers = [models.Answer(text=fake.text(),
-                                 author=profiles[random.randint(0,count.USER-1)],
-                                 rating=random.randint(0,100),
-                                 question=questions[random.randint(0,count.QUESTION-1)],
-                                 created_at=fake.date(),
-                                 updated_at=fake.date())
-                   for _ in range(count.ANSWER)]
-        models.Answer.objects.bulk_create(answers)
         print("Answer created successfully")
 
-        answers_likes = [models.AnswerLike(author=profiles[random.randint(0,count.USER-1)],
-                                           answer=answers[random.randint(0,count.ANSWER-1)]) for _ in range(count.LIKES)]
-        models.AnswerLike.objects.bulk_create(answers_likes)
+        answers_likes = []
+        for _ in range(count.LIKES // 2):
+            author = profiles[random.randint(0, count.USER - 1)]
+            answer = answers[random.randint(0, count.ANSWER - 1)]
+            answer.rating += 1
+            answers_likes.append(models.AnswerLike(author=author, answer=answer))
         print("Answers likes created successfully")
 
-        question_likes = [models.QuestionLike(author=profiles[random.randint(0, count.USER - 1)],
-                                           question=questions[random.randint(0, count.QUESTION - 1)]) for _ in range(count.LIKES)]
+        question_likes = []
+        for _ in range(count.LIKES // 2):
+            author = profiles[random.randint(0, count.USER - 1)]
+            question = questions[random.randint(0, count.QUESTION - 1)]
+            question.rating += 1
+            question_likes.append(models.QuestionLike(author=author, question=question))
+        models.Question.objects.bulk_create(questions)
         models.QuestionLike.objects.bulk_create(question_likes)
-        print("Questions likes created successfully")
+        models.Answer.objects.bulk_create(answers)
+        models.AnswerLike.objects.bulk_create(answers_likes)
+        print("Questions likes created successfully and all in database successfully")
+
+
+        for i in range(count.TAG):
+            for _ in range(random.randint(1, 20)):
+                j = random.randint(0, count.QUESTION-1)
+                if questions[j].tags.all().count() < 3:
+                    tags[i].question_set.set([questions[j]])
+        print("Questions with tag created successfully")
         return "Data base filled successfully"

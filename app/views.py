@@ -25,28 +25,23 @@ def paginate(obj_list, request, per_page):
 
 def index(request):
     questions = models.Question.objects.get_new_question()
-    obj = models.Question.objects.get_tag(questions)
-    obj = models.Answer.objects.get_all_answers(obj)
-    page_obj = paginate(obj, request, 5)
+    page_obj = paginate(questions, request, 5)
     best_members = models.Profile.objects.get_top()
-    print(obj[0]['created_at'])
-    print(obj[1]['created_at'])
     return render(request, 'index.html', {"questions": page_obj, "best_members": best_members})
 
 
 def hot(request):
     questions = models.Question.objects.get_popular()
-    obj = models.Question.objects.get_tag(questions)
-    obj = models.Answer.objects.get_all_answers(obj)
+    page_obj = paginate(questions, request, 5)
     best_members = models.Profile.objects.get_top()
-    return render(request, 'hot.html', {"questions": obj, "best_members": best_members})
+    return render(request, 'hot.html', {"questions": page_obj, "best_members": best_members})
 
 def question(request, question_id):
     item = models.Question.objects.get_one(question_id)
     answers = models.Answer.objects.get_answers(item['id'])
-    item['answers'] = answers
+    answers = paginate(answers, request, 5)
     best_members = models.Profile.objects.get_top()
-    return render(request, 'question.html', {"item": item, "best_members": best_members})
+    return render(request, 'question.html', {"item": item, "answers":answers, "best_members": best_members})
 
 
 def new_question(request):
@@ -56,8 +51,7 @@ def new_question(request):
 
 def tags(request, tag_title):
     questions = models.Question.objects.get_by_tag(tag_title)
-    obj = models.Question.objects.get_tag(questions)
-    page_obj = paginate(obj, request, 3)
+    page_obj = paginate(questions, request, 3)
     best_members = models.Profile.objects.get_top()
     return render(request, 'tags.html', {"questions": page_obj, "tag":tag_title, "best_members": best_members})
 

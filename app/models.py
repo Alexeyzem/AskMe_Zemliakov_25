@@ -20,7 +20,7 @@ from django.db import models
 
 class ProfileManager(models.Manager):
     def get_top(self):
-        return self.order_by('rating')[:5]
+        return self.order_by('rating').reverse()[:5]
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.PROTECT)
     rating = models.IntegerField(default=0)
@@ -38,17 +38,11 @@ class Tag(models.Model):
 
 class QuestionManager(models.Manager):
     def get_new_question(self):
-        return self.order_by('created_at')[:100]
+        return self.order_by('created_at').reverse()
     def get_popular(self):
-        return self.order_by('rating').reverse()[:5]
+        return self.order_by('rating').reverse()
     def get_by_tag(self, tag_title):
         return self.filter(tags__title=tag_title)
-    def get_tag(self, questions):
-        dict = questions.values()
-        for question in dict:
-            tags = Question.objects.get(pk=question['id']).tags.all()
-            question['tags'] = tags
-        return dict
     def get_one(self, id):
         question = Question.objects.filter(pk=id).values()[0]
         tags = Question.objects.get(pk=id).tags.all()
@@ -62,6 +56,7 @@ class Question(models.Model):
     author = models.ForeignKey(Profile, on_delete=models.CASCADE)
     tags = models.ManyToManyField(Tag, blank=True)
     rating = models.IntegerField(default=0)
+    answers_count = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = QuestionManager()
@@ -70,12 +65,8 @@ class Question(models.Model):
 
 class AnswerManager(models.Manager):
     def get_answers(self, question):
-        return self.filter(question=question)
-    def get_all_answers(self, questions):
-        for question in questions:
-            answers = Answer.objects.filter(question=question['id'])
-            question['answers'] = answers
-        return questions
+        return self.filter(question=question).order_by('rating').reverse()
+
 
 class Answer(models.Model):
     text = models.TextField()

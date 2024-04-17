@@ -19,10 +19,10 @@
 	                  {{item.text}}
                   </p>
                   <div class="row">
-                    <a class="col-4" href='{% url "question" item.id %}'>answers: {{ item.answers.count }}</a>
+                    <a class="col-4" href='{% url "question" item.id %}'>answers: {{ item.answers_count }}</a>
                     <div class="col-8">
                       <span>Tags</span>
-	                    {% for tag in item.tags %}
+	                    {% for tag in item.tags.all %}
                       <a href='{% url "tags" tag.title%}'>{{ tag.title }}</a>
 	                    {% endfor %}
                     </div>
