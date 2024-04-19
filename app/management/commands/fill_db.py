@@ -122,6 +122,6 @@ class Command(BaseCommand):
             for _ in range(random.randint(1, 20)):
                 j = random.randint(0, count.QUESTION-1)
                 if questions[j].tags.all().count() < 3:
-                    tags[i].question_set.set([questions[j]])
+                    tags[i].question_set.add(questions[j])
         print("Questions with tag created successfully")
         return "Data base filled successfully"

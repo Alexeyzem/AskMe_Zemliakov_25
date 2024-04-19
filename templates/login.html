@@ -1,5 +1,6 @@
 {% extends "./layouts/base.html" %}
 {% load static %}
+{% load django_bootstrap5 %}
 
 
 {% block content %}
@@ -7,21 +8,16 @@
 				<div class="d-flex gap-3 align-items-center">
         <h2>Log In</h2>
 	</div>
-			  <div class="mb-3 row">
-				  <label class="col-sm-2 col-form-label">Email</label>
-				  <div class="col-sm-10">
-					  <input type="text" class="form-control" placeholder="email@example.com">
-				  </div>
-			  </div>
-			<div class="mb-3 row">
-				<label for="inputPassword" class="col-sm-2 col-form-label">Password</label>
-				<div class="col-sm-10">
-					<input type="password" class="form-control" id="inputPassword">
-				</div>
-				<span style="color: red; text-align: center" class="mt-3">Sorry, wrong password</span>
-			</div>
+			<form method="post" action="">
+				{% if errors %}
+					<span style="color: red"> {{ errors }}</span>
+				{% endif %}
+			{% csrf_token %}
+			  {% bootstrap_form form %}
+
 			<button class="mb-4">Log In</button>
 			<br>
 			<a href='{% url "signup" %}'>create new account</a>
-		</div>
+	</form>
+	</div>
 {% endblock %}

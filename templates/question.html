@@ -1,5 +1,6 @@
 {% extends "./layouts/base.html" %}
 {% load static %}
+{% load django_bootstrap5 %}
 
 {% block content %}
 <div class="d-flex gap-3 align-items-center">
@@ -16,7 +17,10 @@
         {% include "layouts/pagination.html" with page_obj=answers%}
 
 	        <hr>
-	        <textarea style="height: 100px; width: 100%" placeholder="Input your answer here"></textarea>
+        <form method="post" action="">
+	        {% csrf_token %}
+	        {% bootstrap_form form %}
 	        <button>Answer</button>
+	        </form>
         </div>
 {% endblock %}

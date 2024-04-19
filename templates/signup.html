@@ -1,5 +1,6 @@
 {% extends "./layouts/base.html" %}
 {% load static %}
+{% load django_bootstrap5 %}
 
 
 
@@ -7,53 +8,13 @@
 		<div class="col-8">
 	  <div class="d-flex gap-3 align-items-center">
         <h2>Registration</h2>
-	</div>
-			<p style="color: red"> Sorry, this email address already exist</p>
-			<div class="mb-3 row">
-    <label class="col-sm-3 col-form-label">Login</label>
-    <div class="col-sm-9">
-      <input type="text" placeholder="dr_pepper" class="form-control">
-    </div>
-  </div>
-
-			<div class="mb-3 row">
-    <label class="col-sm-3 col-form-label">Email</label>
-    <div class="col-sm-9">
-      <input type="text" placeholder="example@mail.ru" class="form-control">
-    </div>
-  </div>
-
-			<div class="mb-3 row">
-    <label class="col-sm-3 col-form-label">NickName</label>
-    <div class="col-sm-9">
-      <input type="text" placeholder="Dr.Pepper" class="form-control">
-    </div>
-  </div>
-
-			<div class="mb-3 row">
-    <label class="col-sm-3 col-form-label">Password</label>
-    <div class="col-sm-9">
-      <input type="password" class="form-control">
-    </div>
-  </div>
-
-  <div class="mb-3 row">
-    <label class="col-sm-3 col-form-label">Repeat password</label>
-    <div class="col-sm-9">
-      <input type="password" class="form-control">
-    </div>
-  </div>
-			<div class="row">
-    <label class="col-sm-3 col-form-label">Upload avatar</label>
-    <div class="col-sm-4">
-      <input type="text" placeholder="c:\avatar.jpg" class="form-control">
-    </div>
-				<div class="col-sm-5">
-					<button>Choose</button>
-				</div>
-  </div>
+		  	</div>
+		  <form method="post", action="">
+			  {% csrf_token %}
+			  {% bootstrap_form form %}
 			<div class="mt-4" style="text-align: center">
 				<button style="width: 150px; height: 50px">Register!</button>
 			</div>
+			  </form>
 		</div>
 {% endblock %}

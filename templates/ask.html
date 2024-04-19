@@ -1,5 +1,6 @@
 {% extends "./layouts/base.html" %}
 {% load static %}
+{% load django_bootstrap5 %}
 
 
 {% block content %}
@@ -7,24 +8,10 @@
         <h1>New Question</h1>
       </div>
         <div class="col-8">
-	       <div class="input-group mb-3">
-                <span class="input-group-text">Title</span>
-                <input type="text" class="form-control"
-                       placeholder="Question"
-                       aria-label="Username"
-                       aria-describedby="basic-addon1">
-			</div>
-	        <div class="input-group mb-3">
-                <span class="input-group-text">Text</span>
-		        <textarea class="form-control" style="height: 300px"></textarea>
-			</div>
-	        <div class="input-group mb-3">
-                <span class="input-group-text">Tags</span>
-                <input type="text" class="form-control"
-                       placeholder="Tags"
-                       aria-label="Username"
-                       aria-describedby="basic-addon1">
-	        </div>
+        <form method="post" action="">
+	      {% csrf_token %}
+	        {% bootstrap_form form %}
 	        <button type="submit" class="btn btn-primary">ASK!</button>
+	        </form>
         </div>
       {% endblock %}
