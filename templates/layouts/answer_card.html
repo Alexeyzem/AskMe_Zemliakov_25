@@ -5,7 +5,7 @@
               <div class="col-3 p-2">
                 <div class="border mb-3" style="height: 100px; width: 100px">
                   <img
-                    src="{% static 'img/img.jpg'%}"
+                    src="{{ item.author.avatar.url }}"
                     class="img-fluid rounded-start"
                     alt="..."
                   />

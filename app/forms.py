@@ -29,7 +29,11 @@ class RegisterForm(forms.ModelForm):
         user = super(RegisterForm, self).save(commit=False)
         user.set_password(self.cleaned_data['password'])
         user.save()
-        models.Profile(rating=0, user=user).save()
+        avatar = self.cleaned_data['avatar']
+        if avatar is not None:
+            models.Profile(rating=0, user=user, avatar=avatar).save()
+        else:
+            models.Profile(rating=0, user=user, avatar='uploads/kot.jpg').save()
         return user
 
 class AskForm(forms.ModelForm):
@@ -54,6 +58,7 @@ class AskForm(forms.ModelForm):
         question.author = author
         question.created_at = datetime.now()
         question.updated_at = datetime.now()
+        question.avatar = author.avatar
         question.rating = 0
         question.answers_count = 0
         question.save()
@@ -74,6 +79,7 @@ class AnswerForm(forms.ModelForm):
     def save(self, commit=True, author=None, question=None):
         answer = super(AnswerForm, self).save(commit=False)
         answer.author = author
+        answer.avatar = author.avatar
         answer.created_at = datetime.now()
         answer.updated_at = datetime.now()
         answer.rating = 0
@@ -90,7 +96,7 @@ class SettingsForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ['username', 'email']
+        fields = ['username', 'email', 'avatar']
 
     def save(self, commit=True, user=None):
         new_username = self.cleaned_data['username']

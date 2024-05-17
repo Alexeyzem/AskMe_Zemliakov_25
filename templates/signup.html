@@ -9,7 +9,7 @@
 	  <div class="d-flex gap-3 align-items-center">
         <h2>Registration</h2>
 		  	</div>
-		  <form method="post", action="">
+		  <form method="post", action="" enctype="multipart/form-data">
 			  {% csrf_token %}
 			  {% bootstrap_form form %}
 			<div class="mt-4" style="text-align: center">

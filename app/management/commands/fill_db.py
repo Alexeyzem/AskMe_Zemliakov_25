@@ -70,7 +70,7 @@ class Command(BaseCommand):
                     break
             users.append(models.User(username=user_name, password=fake.password(), email=fake.email()))
         models.User.objects.bulk_create(users)
-        profiles = [models.Profile(rating=random.randint(0,1000), user=users[i], avatar="static/img/img.jpg") for i in range(count.USER)]
+        profiles = [models.Profile(rating=random.randint(0,1000), user=users[i], avatar="uploads/kot.jpg") for i in range(count.USER)]
         models.Profile.objects.bulk_create(profiles)
         print("Profile created successfully")
 
@@ -111,11 +111,12 @@ class Command(BaseCommand):
             question = questions[random.randint(0, count.QUESTION - 1)]
             question.rating += 1
             question_likes.append(models.QuestionLike(author=author, question=question))
+        print("Question likes created successfully")
         models.Question.objects.bulk_create(questions)
         models.QuestionLike.objects.bulk_create(question_likes)
         models.Answer.objects.bulk_create(answers)
         models.AnswerLike.objects.bulk_create(answers_likes)
-        print("Questions likes created successfully and all in database successfully")
+        print("all in database successfully")
 
 
         for i in range(count.TAG):

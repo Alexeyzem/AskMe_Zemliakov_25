@@ -36,39 +36,43 @@ def index(request):
     questions = models.Question.objects.get_new_question()
     page_obj = paginate(questions, request, 5)
     best_members = models.Profile.objects.get_top()
-    return render(request, 'index.html', {"questions": page_obj, "best_members": best_members})
+    best_tags = models.Tag.objects.get_top()
+    return render(request, 'index.html', {"questions": page_obj, "best_members": best_members, "best_tags": best_tags})
 
 
 def hot(request):
     questions = models.Question.objects.get_popular()
     page_obj = paginate(questions, request, 5)
     best_members = models.Profile.objects.get_top()
-    return render(request, 'hot.html', {"questions": page_obj, "best_members": best_members})
+    best_tags = models.Tag.objects.get_top()
+    return render(request, 'hot.html', {"questions": page_obj, "best_members": best_members, "best_tags": best_tags})
 
 @require_http_methods(['GET', 'POST'])
 def question(request, question_id):
-    item = models.Question.objects.get_one(question_id)
-    answers = models.Answer.objects.get_answers(item['id'])
+    item = models.Question.objects.get(id=question_id)
+    answers = models.Answer.objects.get_answers(item.id)
     answers = paginate(answers, request, 5)
     best_members = models.Profile.objects.get_top()
+    best_tags = models.Tag.objects.get_top()
     if request.method == "POST":
         answer_form = AnswerForm(request.POST)
         if answer_form.is_valid():
-            answer = answer_form.save(author=models.Profile.objects.get(user__username=request.user.username), question=models.Question.objects.get(id=item['id']))
+            answer = answer_form.save(author=models.Profile.objects.get(user__username=request.user.username), question=models.Question.objects.get(id=item.id))
             if answer:
-                answers = models.Answer.objects.get_answers(item['id'])
+                answers = models.Answer.objects.get_answers(item.id)
                 answers = paginate(answers, request, 5)
-                item['answers_count'] += 1
-                return render(request, 'question.html', {"item": item, "answers":answers, "best_members": best_members, "form": answer_form})
+                item.answers_count += 1
+                return render(request, 'question.html', {"item": item, "answers":answers, "best_members": best_members, "best_tags": best_tags,"form": answer_form})
     if request.method == 'GET':
         answer_form = AnswerForm()
-    return render(request, 'question.html', {"item": item, "answers":answers, "best_members": best_members, "form": answer_form})
+    return render(request, 'question.html', {"item": item, "answers":answers, "best_members": best_members, "best_tags": best_tags ,"form": answer_form})
 
 def tags(request, tag_title):
     questions = models.Question.objects.get_by_tag(tag_title)
     page_obj = paginate(questions, request, 3)
     best_members = models.Profile.objects.get_top()
-    return render(request, 'tags.html', {"questions": page_obj, "tag":tag_title, "best_members": best_members})
+    best_tags = models.Tag.objects.get_top()
+    return render(request, 'tags.html', {"questions": page_obj, "tag":tag_title, "best_members": best_members,"best_tags": best_tags })
 
 @login_required(redirect_field_name='login', login_url='/login')
 @require_http_methods(['GET', 'POST'])
@@ -92,6 +96,7 @@ def settings(request):
 @require_http_methods(['GET', 'POST'])
 def new_question(request):
     best_members = models.Profile.objects.get_top()
+    best_tags = models.Tag.objects.get_top()
     if request.method == 'GET':
         ask_form = AskForm()
     if request.method == 'POST':
@@ -102,14 +107,14 @@ def new_question(request):
                 return redirect(reverse("question" , args=[ques.id]))
             else:
                 ask_form.add_error(field=None, error="Question was not saved.")
-    return render(request, 'ask.html', {"best_members": best_members, "form":ask_form})
+    return render(request, 'ask.html', {"best_members": best_members, "best_tags":best_tags, "form":ask_form})
 
 @require_http_methods(['GET', 'POST'])
 def sign_up(request):
     if request.method == 'GET':
         signup_form = RegisterForm()
     if request.method == 'POST':
-        signup_form = RegisterForm(data=request.POST)
+        signup_form = RegisterForm(request.POST, request.FILES)
         if signup_form.is_valid():
             user = signup_form.save()
             if user:
@@ -118,7 +123,8 @@ def sign_up(request):
             else:
                 signup_form.add_error(field=None, error="User saving error")
     best_members = models.Profile.objects.get_top()
-    return render(request, 'signup.html', {"best_members": best_members, "form":signup_form})
+    best_tags = models.Tag.objects.get_top()
+    return render(request, 'signup.html', {"best_members": best_members, "form":signup_form, "best_tags":best_tags})
 
 @require_http_methods(['GET', 'POST'])
 def login(request):
@@ -135,7 +141,8 @@ def login(request):
             else:
                 errors = 'Wrong username or password'
     best_members = models.Profile.objects.get_top()
-    return render(request, 'login.html',{"best_members": best_members, "form": login_form, "errors": errors})
+    best_tags = models.Tag.objects.get_top()
+    return render(request, 'login.html',{"best_members": best_members, "form": login_form, "errors": errors, "best_tags": best_tags})
 
 @login_required(redirect_field_name='login', login_url='/login')
 def log_out(request):

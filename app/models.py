@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models import Count
 
 # Create your models here.
 
@@ -24,14 +25,18 @@ class ProfileManager(models.Manager):
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.PROTECT)
     rating = models.IntegerField(default=0)
-    avatar = models.ImageField(null=True, blank=True)
+    avatar = models.ImageField(null=True, blank=True, default='uploads/kot.jpg')
     objects = ProfileManager()
     def __str__(self):
         return str(self.user.username)
 
+class TagManager(models.Manager):
+    def get_top(self):
+        return self.annotate(cnt = Count("question")).order_by('cnt').reverse()[:5]
 
 class Tag(models.Model):
     title = models.TextField(max_length=30, unique=True)
+    objects = TagManager()
     def __str__(self):
         return self.title
 
@@ -43,11 +48,6 @@ class QuestionManager(models.Manager):
         return self.order_by('rating').reverse()
     def get_by_tag(self, tag_title):
         return self.filter(tags__title=tag_title)
-    def get_one(self, id):
-        question = Question.objects.filter(pk=id).values()[0]
-        tags = Question.objects.get(pk=id).tags.all()
-        question['tags'] = tags
-        return question
 
 
 class Question(models.Model):
@@ -65,7 +65,7 @@ class Question(models.Model):
 
 class AnswerManager(models.Manager):
     def get_answers(self, question):
-        return self.filter(question=question).order_by('rating').reverse()
+        return self.filter(question=question).order_by('rating', '-created_at').reverse()
 
 
 class Answer(models.Model):
