@@ -1,14 +1,16 @@
 {% load static %}
 
-          <article class="card mb-3 w-100">
+          <article class="question-card mb-3 w-100" data-question_id="{{ item.id }}">
             <div class="row g-0">
               <div class="col-3 p-2">
                 <div class="border mb-3" style="height: 100px; width: 100px">
                   <img src="{{ item.author.avatar.url }}" class="img-fluid rounded-start"/>
                 </div>
                 <div class="input-group flex-nowrap" style="width: 100px">
-                  <input type="number" value={{ item.rating }} class="form-control" />
+		                <button type="submit" class="btn btn-success question-like-button" style="width: 100%">Like</button>
+		                <button type="submit" class="btn btn-danger question-dislike-button" style="width: 100%">Dislike</button>
                 </div>
+	              Likes:<span class="question-like-counter">{{ item.rating }}</span>
               </div>
               <div class="col">
                 <div class="card-body">

@@ -12,5 +12,8 @@ urlpatterns = [
     path("logout/", views.log_out, name='logout'),
     path("signup/", views.sign_up, name='signup'),
     path("members/", views.members, name='members'),
-    path("login/", views.login, name='login')
+    path("login/", views.login, name='login'),
+    path('like_async/<int:item_id>', views.question_like_async, name='question_like_async'),
+    path('answer_like_async/<int:item_id>', views.answer_like_async, name='answer_like_async'),
+    path('answer_correct_async/<int:item_id>', views.answer_correct_async, name='answer_correct_async'),
 ]

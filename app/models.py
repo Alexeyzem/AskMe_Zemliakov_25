@@ -65,7 +65,7 @@ class Question(models.Model):
 
 class AnswerManager(models.Manager):
     def get_answers(self, question):
-        return self.filter(question=question).order_by('rating', '-created_at').reverse()
+        return self.filter(question=question).order_by('correct', 'rating', '-created_at').reverse()
 
 
 class Answer(models.Model):
@@ -75,6 +75,7 @@ class Answer(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     rating = models.IntegerField(default=0)
+    correct = models.BooleanField(default=False)
     objects = AnswerManager()
     def __str__(self):
         return self.text
@@ -82,7 +83,9 @@ class Answer(models.Model):
 class QuestionLike(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     author = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    num = models.IntegerField(default=0)
 
 class AnswerLike(models.Model):
     answer = models.ForeignKey(Answer, on_delete=models.CASCADE)
     author = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    num = models.IntegerField(default=0)

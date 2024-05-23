@@ -1,6 +1,6 @@
 {% load static %}
 
- <article class="card mb-3 w-100">
+ <article class="answer-card mb-3 w-100" data-answer_id = "{{ item.id }}">
             <div class="row g-0">
               <div class="col-3 p-2">
                 <div class="border mb-3" style="height: 100px; width: 100px">
@@ -11,8 +11,10 @@
                   />
                 </div>
                 <div class="input-group flex-nowrap" style="width: 100px">
-                  <input type="number" value={{ item.rating }} class="form-control" />
+	                <button type="button" class="btn btn-success answer-like-button" style="width: 100%">Like</button>
+					<button type="button" class="btn btn-danger answer-dislike-button" style="width: 100%">Dislike</button>
                 </div>
+	              Likes:<span class="answer-like-counter">{{ item.rating }}</span>
               </div>
               <div class="col">
                 <div class="card-body">
@@ -21,7 +23,19 @@
                   </p>
                   <div class="row">
                     <div class="form-check">
-	                    <input class="form-check-input" type="checkbox" value="">
+	                    {%  if request.user.profile == item.question.author %}
+	                        {%  if item.correct %}
+	                    <input class="form-check-input checkingAnswer" type="checkbox" value="" checked>
+	                        {%  else %}
+		                        <input class="form-check-input checkingAnswer" type="checkbox" value="">
+	                        {% endif %}
+	                    {% else %}
+                            {%  if item.correct %}
+	                            <input class="form-check-input" type="checkbox" value="" checked disabled>
+                            {%  else %}
+		                        <input class="form-check-input" type="checkbox" value="" disabled>
+	                        {% endif %}
+                        {% endif %}
 	                    <label class="form-check-label">Correct</label>
                     </div>
                   </div>

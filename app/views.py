@@ -3,14 +3,15 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.forms import forms
-from django.http import HttpResponse
-from django.shortcuts import render, redirect
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
+from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_http_methods
 
 from app import models
 from app.forms import LoginForm, RegisterForm, AskForm, AnswerForm, SettingsForm
-
+import json
 
 def paginate(obj_list, request, per_page):
     paginator = Paginator(obj_list, per_page)
@@ -150,3 +151,73 @@ def log_out(request):
     return redirect(reverse('index'))
 def members(request):
     return HttpResponse('members')
+
+@require_http_methods(['POST'])
+@login_required(redirect_field_name='login', login_url='/login')
+@csrf_protect
+def question_like_async(request, item_id):
+    question = get_object_or_404(models.Question, pk=item_id)
+    question_like, _ = models.QuestionLike.objects.get_or_create(question=question, author=request.user.profile)
+    body = json.loads(request.body)
+    updatingInfo = 0
+    if body["action"] == "like":
+        updatingInfo = 1
+    elif body["action"] == "dislike":
+        updatingInfo = -1
+    if question_like.num == 0:
+        question_like.num = updatingInfo
+        question_like.save()
+        question.rating += updatingInfo
+        question.save()
+    elif question_like.num == updatingInfo:
+        question_like.delete()
+        question.rating-= updatingInfo
+        question.save()
+    elif question_like.num == -updatingInfo:
+        question_like.num = updatingInfo
+        question_like.save()
+        question.rating += 2*updatingInfo
+        question.save()
+    body["likes_count"] = question.rating
+    return JsonResponse(body)
+
+@require_http_methods(['POST'])
+@login_required(redirect_field_name='login', login_url='/login')
+@csrf_protect
+def answer_like_async(request, item_id):
+    answer = get_object_or_404(models.Answer, pk=item_id)
+    answer_like, _ = models.AnswerLike.objects.get_or_create(answer=answer, author=request.user.profile)
+    body = json.loads(request.body)
+    updatingInfo = 0
+    if body["action"] == "like":
+        updatingInfo = 1
+    elif body["action"] == "dislike":
+        updatingInfo = -1
+    if answer_like.num == 0:
+        answer_like.num = updatingInfo
+        answer_like.save()
+        answer.rating += updatingInfo
+        answer.save()
+    elif answer_like.num == updatingInfo:
+        answer_like.delete()
+        answer.rating-= updatingInfo
+        answer.save()
+    elif answer_like.num == -updatingInfo:
+        answer_like.num = updatingInfo
+        answer_like.save()
+        answer.rating += 2*updatingInfo
+        answer.save()
+    body["likes_count"] = answer.rating
+    return JsonResponse(body)
+
+@require_http_methods(['POST'])
+@login_required(redirect_field_name='login', login_url='/login')
+@csrf_protect
+def answer_correct_async(request, item_id):
+    answer = get_object_or_404(models.Answer, pk=item_id)
+    if answer.correct:
+        answer.correct = False
+    else:
+        answer.correct = True
+    answer.save()
+    return JsonResponse({'status':'ok'})
