@@ -1,6 +1,7 @@
 {% load static %}
-
-          <article class="question-card mb-3 w-100" data-question_id="{{ item.id }}">
+	<div class="card mb-3 w-100">
+		<div class="card-body">
+          <article class="question-card w-100" data-question_id="{{ item.id }}">
             <div class="row g-0">
               <div class="col-3 p-2">
                 <div class="border mb-3" style="height: 100px; width: 100px">
@@ -33,3 +34,5 @@
               </div>
             </div>
           </article>
+		</div>
+	</div>

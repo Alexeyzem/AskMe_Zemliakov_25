@@ -78,6 +78,7 @@ def tags(request, tag_title):
 @login_required(redirect_field_name='login', login_url='/login')
 @require_http_methods(['GET', 'POST'])
 def settings(request):
+    best_tags = models.Tag.objects.get_top()
     if request.method == "POST":
         user_from_db = models.User.objects.get(username=request.user.username)
         setting_form = SettingsForm(request.POST, request.FILES, user_from_db)
@@ -91,7 +92,7 @@ def settings(request):
     if request.method == "GET":
         setting_form = SettingsForm()
     best_members = models.Profile.objects.get_top()
-    return render(request, 'settings.html', {"best_members": best_members, "form": setting_form})
+    return render(request, 'settings.html', {"best_members": best_members, "best_tags":best_tags, "form": setting_form})
 
 @login_required(redirect_field_name='login', login_url='/login')
 @require_http_methods(['GET', 'POST'])
