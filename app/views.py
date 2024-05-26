@@ -49,6 +49,7 @@ def hot(request):
     return render(request, 'hot.html', {"questions": page_obj, "best_members": best_members, "best_tags": best_tags})
 
 @require_http_methods(['GET', 'POST'])
+@csrf_protect
 def question(request, question_id):
     item = models.Question.objects.get(id=question_id)
     answers = models.Answer.objects.get_answers(item.id)
@@ -77,6 +78,7 @@ def tags(request, tag_title):
 
 @login_required(redirect_field_name='login', login_url='/login')
 @require_http_methods(['GET', 'POST'])
+@csrf_protect
 def settings(request):
     best_tags = models.Tag.objects.get_top()
     if request.method == "POST":
@@ -96,6 +98,7 @@ def settings(request):
 
 @login_required(redirect_field_name='login', login_url='/login')
 @require_http_methods(['GET', 'POST'])
+@csrf_protect
 def new_question(request):
     best_members = models.Profile.objects.get_top()
     best_tags = models.Tag.objects.get_top()
@@ -112,6 +115,7 @@ def new_question(request):
     return render(request, 'ask.html', {"best_members": best_members, "best_tags":best_tags, "form":ask_form})
 
 @require_http_methods(['GET', 'POST'])
+@csrf_protect
 def sign_up(request):
     if request.method == 'GET':
         signup_form = RegisterForm()
@@ -129,6 +133,7 @@ def sign_up(request):
     return render(request, 'signup.html', {"best_members": best_members, "form":signup_form, "best_tags":best_tags})
 
 @require_http_methods(['GET', 'POST'])
+@csrf_protect
 def login(request):
     if request.method == 'GET':
         login_form = LoginForm()
@@ -169,14 +174,20 @@ def question_like_async(request, item_id):
         question_like.num = updatingInfo
         question_like.save()
         question.rating += updatingInfo
+        request.user.profile.rating += updatingInfo
+        request.user.profile.save()
         question.save()
     elif question_like.num == updatingInfo:
         question_like.delete()
         question.rating-= updatingInfo
+        request.user.profile.rating -= updatingInfo
+        request.user.profile.save()
         question.save()
     elif question_like.num == -updatingInfo:
         question_like.num = updatingInfo
         question_like.save()
+        request.user.profile.rating += 2*updatingInfo
+        request.user.profile.save()
         question.rating += 2*updatingInfo
         question.save()
     body["likes_count"] = question.rating
@@ -197,15 +208,21 @@ def answer_like_async(request, item_id):
     if answer_like.num == 0:
         answer_like.num = updatingInfo
         answer_like.save()
+        request.user.profile.rating += updatingInfo
+        request.user.profile.save()
         answer.rating += updatingInfo
         answer.save()
     elif answer_like.num == updatingInfo:
         answer_like.delete()
         answer.rating-= updatingInfo
+        request.user.profile.rating -= updatingInfo
+        request.user.profile.save()
         answer.save()
     elif answer_like.num == -updatingInfo:
         answer_like.num = updatingInfo
         answer_like.save()
+        request.user.profile.rating += 2 * updatingInfo
+        request.user.profile.save()
         answer.rating += 2*updatingInfo
         answer.save()
     body["likes_count"] = answer.rating
