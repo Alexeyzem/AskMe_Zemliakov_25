@@ -102,13 +102,13 @@ class SettingsForm(forms.ModelForm):
         new_username = self.cleaned_data['username']
         new_email = self.cleaned_data['email']
         new_avatar = self.cleaned_data['avatar']
+        profile = user.profile
         if new_username != '' and new_username != user.username:
             user.username = new_username
         if new_email != '' and new_email != user.email:
             user.email = new_email
-        profile = user.profile
-        if new_avatar != '' and new_avatar != profile.avatar:
-            profile.avatar = new_avatar
         user.save(update_fields=['username', 'email'])
-        profile.save(update_fields=['avatar'])
+        if not (new_avatar is None) and new_avatar != profile.avatar:
+            profile.avatar = new_avatar
+            profile.save(update_fields=['avatar', 'user'])
         return user

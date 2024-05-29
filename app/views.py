@@ -8,11 +8,15 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_http_methods
-
 from app import models
 from app.forms import LoginForm, RegisterForm, AskForm, AnswerForm, SettingsForm
+from django.core.cache import cache
 import json
 
+def cache_data():
+    best_tags = cache.get('best_tags')
+    best_members = cache.get('best_members')
+    return best_tags, best_members
 def paginate(obj_list, request, per_page):
     paginator = Paginator(obj_list, per_page)
     page_num = request.GET.get('page', 1)
@@ -36,16 +40,14 @@ def paginate(obj_list, request, per_page):
 def index(request):
     questions = models.Question.objects.get_new_question()
     page_obj = paginate(questions, request, 5)
-    best_members = models.Profile.objects.get_top()
-    best_tags = models.Tag.objects.get_top()
+    best_tags, best_members = cache_data()
     return render(request, 'index.html', {"questions": page_obj, "best_members": best_members, "best_tags": best_tags})
 
 
 def hot(request):
     questions = models.Question.objects.get_popular()
     page_obj = paginate(questions, request, 5)
-    best_members = models.Profile.objects.get_top()
-    best_tags = models.Tag.objects.get_top()
+    best_tags, best_members = cache_data()
     return render(request, 'hot.html', {"questions": page_obj, "best_members": best_members, "best_tags": best_tags})
 
 @require_http_methods(['GET', 'POST'])
@@ -54,8 +56,7 @@ def question(request, question_id):
     item = models.Question.objects.get(id=question_id)
     answers = models.Answer.objects.get_answers(item.id)
     answers = paginate(answers, request, 5)
-    best_members = models.Profile.objects.get_top()
-    best_tags = models.Tag.objects.get_top()
+    best_tags, best_members = cache_data()
     if request.method == "POST":
         answer_form = AnswerForm(request.POST)
         if answer_form.is_valid():
@@ -64,7 +65,7 @@ def question(request, question_id):
                 answers = models.Answer.objects.get_answers(item.id)
                 answers = paginate(answers, request, 5)
                 item.answers_count += 1
-                return render(request, 'question.html', {"item": item, "answers":answers, "best_members": best_members, "best_tags": best_tags,"form": answer_form})
+                return render(request, 'question.html', {"item": item, "answers":answers, "best_members": best_members, "best_tags": best_tags, "form": answer_form})
     if request.method == 'GET':
         answer_form = AnswerForm()
     return render(request, 'question.html', {"item": item, "answers":answers, "best_members": best_members, "best_tags": best_tags ,"form": answer_form})
@@ -72,15 +73,14 @@ def question(request, question_id):
 def tags(request, tag_title):
     questions = models.Question.objects.get_by_tag(tag_title)
     page_obj = paginate(questions, request, 3)
-    best_members = models.Profile.objects.get_top()
-    best_tags = models.Tag.objects.get_top()
+    best_tags, best_members = cache_data()
     return render(request, 'tags.html', {"questions": page_obj, "tag":tag_title, "best_members": best_members,"best_tags": best_tags })
 
 @login_required(redirect_field_name='login', login_url='/login')
 @require_http_methods(['GET', 'POST'])
 @csrf_protect
 def settings(request):
-    best_tags = models.Tag.objects.get_top()
+    best_tags, best_members = cache_data()
     if request.method == "POST":
         user_from_db = models.User.objects.get(username=request.user.username)
         setting_form = SettingsForm(request.POST, request.FILES, user_from_db)
@@ -93,15 +93,13 @@ def settings(request):
                 setting_form.add_error("can not update user's data")
     if request.method == "GET":
         setting_form = SettingsForm()
-    best_members = models.Profile.objects.get_top()
     return render(request, 'settings.html', {"best_members": best_members, "best_tags":best_tags, "form": setting_form})
 
 @login_required(redirect_field_name='login', login_url='/login')
 @require_http_methods(['GET', 'POST'])
 @csrf_protect
 def new_question(request):
-    best_members = models.Profile.objects.get_top()
-    best_tags = models.Tag.objects.get_top()
+    best_tags, best_members = cache_data()
     if request.method == 'GET':
         ask_form = AskForm()
     if request.method == 'POST':
@@ -128,8 +126,7 @@ def sign_up(request):
                 return redirect(reverse('index'))
             else:
                 signup_form.add_error(field=None, error="User saving error")
-    best_members = models.Profile.objects.get_top()
-    best_tags = models.Tag.objects.get_top()
+    best_tags, best_members = cache_data()
     return render(request, 'signup.html', {"best_members": best_members, "form":signup_form, "best_tags":best_tags})
 
 @require_http_methods(['GET', 'POST'])
@@ -147,8 +144,7 @@ def login(request):
                 return redirect(reverse('index'))
             else:
                 errors = 'Wrong username or password'
-    best_members = models.Profile.objects.get_top()
-    best_tags = models.Tag.objects.get_top()
+    best_tags, best_members = cache_data()
     return render(request, 'login.html',{"best_members": best_members, "form": login_form, "errors": errors, "best_tags": best_tags})
 
 @login_required(redirect_field_name='login', login_url='/login')

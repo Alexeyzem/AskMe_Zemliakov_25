@@ -1,6 +1,10 @@
+from datetime import datetime, timedelta
+
 from django.contrib.auth.models import User
 from django.db import models
-from django.db.models import Count
+from django.db.models import Count, Sum
+from django.utils import timezone
+
 
 # Create your models here.
 
@@ -21,7 +25,7 @@ from django.db.models import Count
 
 class ProfileManager(models.Manager):
     def get_top(self):
-        return self.order_by('rating').reverse()[:5]
+        return self.filter(question__created_at__gt=timezone.now()-timedelta(7)).filter(answer__created_at__gt=timezone.now()-timedelta(7)).annotate(sum = Sum("question__rating")+Sum("answer__rating")).order_by('sum').reverse()[:10]
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.PROTECT)
     rating = models.IntegerField(default=0)
@@ -32,7 +36,7 @@ class Profile(models.Model):
 
 class TagManager(models.Manager):
     def get_top(self):
-        return self.annotate(cnt = Count("question")).order_by('cnt').reverse()[:5]
+        return self.filter(question__created_at__gt=timezone.now()-timedelta(90)).annotate(cnt = Count("question")).order_by('cnt').reverse()[:10]
 
 class Tag(models.Model):
     title = models.TextField(max_length=30, unique=True)
